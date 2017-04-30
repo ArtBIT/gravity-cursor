@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+        <link rel="stylesheet" href="style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+        <title>Cursor Gravity Demo</title>
+        <meta property="og:title" content="Control User Cursor">
+
+        <meta name="description" content="How to hijack the user cursor and make it react to gravity elements on the page">
+        <meta property="og:description" content="How to hijack the user cursor and make it react to gravity elements on the page">
+
+        <style type='text/css'>
+            .shroom-button,
+            .ghost-button,
+            .github-button {
+                display: inline-block;
+                top: calc(50vh - 50px);
+                left: calc(50vw - 50px);
+                width: 100px;
+                height: 100px;
+                position: absolute;
+                background: url(github.png) no-repeat;
+                background-size: contain;
+            }
+            .github-button:hover {
+                opacity: 0.8;
+            }
+            .shroom-button,
+            .ghost-button {
+                width: 32px;
+                height: 32px;
+                background-image: url(ghost.png);
+                background-size: 200%;
+                background-position: 0 0;
+            }
+            .shroom-button:hover,
+            .ghost-button:hover {
+                background-position: 100% 0;
+            }
+            .shroom-button {
+                background-image: url(shroom.png);
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="title">
+                Cursor Gravity Demo
+            </div>
+            <div class="description">
+                Hijack user's cursor and do fun stuff with it.
+            </div>
+            <div class="buttons"></div>
+        </header> 
+        <main></main>
+        <script src="../dist/index.js"></script>
+        <script type="text/javascript">
+            var main = document.getElementsByTagName('main')[0];
+            var header = document.getElementsByTagName('header')[0];
+
+            var createElement = function(type, attrs) {
+                var elem = document.createElement(type);
+                attrs = attrs || {};
+                for (var a in attrs) {
+                    if (attrs.hasOwnProperty(a)) {
+                        switch (a) {
+                            case 'style':
+                                for (var s in attrs[a]) {
+                                    if (attrs[a].hasOwnProperty(s)) {
+                                        elem.style[s] = attrs[a][s];
+                                    }
+                                }
+                                break;
+                            case 'className':
+                            case 'innerHTML':
+                                elem[a] = attrs[a];
+                                break;
+
+                            default:
+                                elem.setAttribute(a, attrs[a]);
+                        }
+                    }
+                }
+                return elem;
+            }
+
+            var calc = function(a, b) {
+                b = Math.round(b);
+                b = (Math.sign(b) < 0 ? '-' : '+') + ' ' + Math.abs(b) + 'px';
+                return 'calc(' + a + ' ' + b + ')';
+            }
+
+            var reset = function() {
+                GravityCursor.remove();
+                main.innerHTML = '';
+            }
+
+            var createDemo = function(label, demoStartCallback) {
+                var buttons = header.querySelector('.buttons');
+                var button = createElement('div', {
+                    className: 'button',
+                    innerHTML: label
+                });
+                button.addEventListener('click', function() {
+                    reset();
+
+                    // Make all the siblings innactive
+                    var sibling = this.parentNode.firstChild;
+                    while (sibling) {
+                        if (sibling.nodeType == 1) {
+                            sibling.classList.remove('active');
+                        }
+                        sibling = sibling.nextSibling;
+                    } 
+                    // make the current button active
+                    this.classList.add('active');
+
+                    demoStartCallback();
+                });
+                buttons.appendChild(button);
+            };
+
+            var startCircleDemo = function() {
+                // Create GitHub attractor at the center of the page
+                var elem = createElement('a', {
+                    href: 'https://github.com/ArtBIT/gravity-cursor',
+                    title: 'Fork me on GitHub',
+                    target: '_blank',
+                    className: 'github-button'
+                });
+                main.appendChild(elem);
+                GravityCursor.attract(elem, 100);
+
+                // Circle it around with N repelling ghosts
+                var count = 8;
+                var angle = 0;
+                var angle_increment = (Math.PI * 2 )/ count;
+                var radius = Math.min(window.innerWidth, window.innerHeight) >> 2;
+                var spriteHalfSize = 16;
+                while (count--) {
+                    var x = Math.cos(angle) * radius - spriteHalfSize;
+                    var y = Math.sin(angle) * radius - spriteHalfSize;
+                    elem = createElement('a', {
+                        href: '#javascript:void(0)',
+                        title: 'Boo!',
+                        target: '_blank',
+                        className: 'ghost-button',
+                        style: {
+                            top: calc('50vh', y),
+                            left: calc('50vw', x)
+                        }
+                    });
+                    main.appendChild(elem);
+                    GravityCursor.repel(elem, 32);
+                    angle += angle_increment;
+                }
+            };
+
+            var createGridDemo = function(rows, cols, options) {
+                return function() {
+                    var cx = cols >> 1;
+                    var cy = rows >> 1;
+                    var distance = 50;
+                    options = options || {};
+                    for (var x = 0; x < cols; x++) {
+                        for (var y = 0; y < rows; y++) {
+                            var elem = createElement('a', {
+                                href: options.href || '#javascript:void(0)',
+                                title: options.title || ':D',
+                                target: '_blank',
+                                className: options.className || 'ghost-button',
+                                style: options.style || {
+                                    top: calc('50vh - 16px', (y - cy)*distance),
+                                    left: calc('50vw - 16px', (x - cx)*distance)
+                                }
+                            });
+                            main.appendChild(elem);
+                            GravityCursor[options.method || 'attract'](elem, 32);
+                        }
+                    }
+                }
+            };
+
+            var startAttractorsDemo = function() {
+                var cols = 8;
+                var rows = 8;
+                var cx = cols >> 1;
+                var cy = rows >> 1;
+                var distance = 50;
+                for (var x = 0; x < cols; x++) {
+                    for (var y = 0; y < rows; y++) {
+                        var elem = createElement('a', {
+                            href: '#javascript:void(0)',
+                            title: attract ? 'XD' : 'Boo!',
+                            target: '_blank',
+                            className: attract ? 'shroom-button' : 'ghost-button',
+                            style: {
+                                top: calc('50vh - 16px', (y - cy)*distance),
+                                left: calc('50vw - 16px', (x - cx)*distance)
+                            }
+                        });
+                        main.appendChild(elem);
+                        GravityCursor[attract ? 'attract' : 'repel'](elem, 32);
+                    }
+                }
+            };
+
+
+            var init = function() {
+                createDemo('Circle', startCircleDemo);
+                createDemo('Attractors', createGridDemo(8, 8, {title:':D', className: 'shroom-button', method: 'attract'}));
+                createDemo('Deflectors', createGridDemo(8, 8, {title:'Boo!', className: 'ghost-button', method: 'repel'}));
+                header.querySelector('.buttons .button').click();
+            }
+            init();
+        </script>
+    </body>
+</html>

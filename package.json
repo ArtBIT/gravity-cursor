@@ -1,0 +1,35 @@
+{
+  "name": "gravity-cursor",
+  "version": "1.0.0",
+  "description": "Hijack user cursor and make it react to attractive/deflective forces on the page.",
+  "main": "src/index.js",
+  "scripts": {
+    "build": "babel src/index.js > dist/index.js",
+    "serve": "http-server -p 9090 .",
+    "demo": "open http://localhost:9090/demos/",
+    "start": "npm run build && npm run demo && npm run serve -s"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArtBIT/gravity-cursor.git"
+  },
+  "keywords": [
+    "mouse",
+    "cursor",
+    "hijack",
+    "repel",
+    "attract",
+    "deflect"
+  ],
+  "author": "Djordje Ungar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ArtBIT/gravity-cursor/issues"
+  },
+  "homepage": "https://github.com/ArtBIT/gravity-cursor#readme",
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "http-server": "^0.9.0",
+    "open": "0.0.5"
+  }
+}
