@@ -6,7 +6,7 @@
   "scripts": {
     "build": "babel src/index.js > dist/index.js",
     "serve": "http-server -p 9090 .",
-    "demo": "open http://localhost:9090/demos/",
+    "demo": "open http://localhost:9090/docs/",
     "start": "npm run build && npm run demo && npm run serve -s"
   },
   "repository": {
