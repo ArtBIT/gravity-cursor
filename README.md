@@ -23,7 +23,7 @@ This will replace the real cursor with the fake one and activate the 'repel' and
 
 ## Demo
 
-Try the live demo [here]().
+Try the live demo [here](https://artbit.github.io/gravity-cursor/demos/).
 
 Or test it locally:
 
