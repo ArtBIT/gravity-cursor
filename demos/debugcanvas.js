@@ -6,6 +6,17 @@ window.DebugCanvas = (function() {
     canvas.height = canvas.style.height = window.innerHeight
     document.body.appendChild(canvas);
     var ctx = canvas.getContext('2d');
+    var applyContextOptions = function(options) {
+        options = options || {};
+        ctx.lineWidth = options.lineWidth || 1;
+        ctx.strokeStyle = options.strokeStyle || '#F00';
+        if (options.lineDash) {
+            ctx.setLineDash(options.lineDash);
+        }
+        if (options.opacity) {
+            ctx.globalAlpha = options.opacity;
+        }
+    };
     var api = {
         show: function() {
             canvas.style.display = 'block';
@@ -41,14 +52,35 @@ window.DebugCanvas = (function() {
                 ctx.moveTo(x, y);
             },
             stroke: function(options) {
-                options = options || {};
                 ctx.save();
-                if (options.lineDash) {
-                    ctx.setLineDash(options.lineDash);
-                }
-                ctx.lineWidth = options.lineWidth || 1;
-                ctx.strokeStyle = options.strokeStyle || '#F00';
+                applyContextOptions(options);
                 ctx.stroke();
+                ctx.restore();
+            },
+            image: function(img, x, y, w, h, dx, dy, dw, dh, options) {
+                ctx.save();
+                switch (arguments.length) {
+                    case 2:
+                        applyContextOptions(x);
+                        ctx.drawImage(img, 0, 0);
+                        break;
+                    case 1:
+                        ctx.drawImage(img, 0, 0);
+                        break;
+                    case 4:
+                    case 3:
+                        applyContextOptions(w);
+                        ctx.drawImage(img, x, y);
+                        break;
+                    case 6:
+                    case 5:
+                        applyContextOptions(dx);
+                        ctx.drawImage(img, x, y, w, h);
+                        break;
+                    default:
+                        applyContextOptions(options);
+                        ctx.drawImage(img, x, y, w, h, dx, dy, dw, dh);
+                }
                 ctx.restore();
             }
         }

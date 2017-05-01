@@ -2,6 +2,7 @@ window.GravityCursor = (function() {
     const VIRTUAL_CURSOR_CLASSNAME = 'virtual-cursor';
     const VIRTUAL_CURSOR_ZINDEX = 10000;
     let showDebugInfo = false;
+    let debugLevel = 0;
 
     let cursor;
     let forces = [];
@@ -34,14 +35,15 @@ window.GravityCursor = (function() {
         let config = CursorAssets[type] || CursorAssets.other;
 
         let node = document.createElement('img');
-        node.src = config.src;
         node.style.width = config.width + 'px'
         node.style.height = config.height + 'px';
         node.style.position = 'fixed';
         node.style.display = 'none';
         node.style.pointerEvents = 'none';
         node.style.zIndex = VIRTUAL_CURSOR_ZINDEX;
+        node.src = config.src;
         body.appendChild(node);
+        this.image = node;
 
         this.show = () => {
             html.classList.add(VIRTUAL_CURSOR_CLASSNAME);
@@ -76,7 +78,7 @@ window.GravityCursor = (function() {
         return value;
     }
 
-    function calculateForces(cursor, forces) {
+    function calculateForces(position, forces) {
         let force = {
             x: 0,
             y: 0
@@ -90,8 +92,8 @@ window.GravityCursor = (function() {
             const rect = obj.node.getBoundingClientRect();
             const rx = rect.left + rect.width / 2;
             const ry = rect.top + rect.height/2;
-            const dx = cursor.x - rx;
-            const dy = cursor.y - ry;
+            const dx = position.x - rx;
+            const dy = position.y - ry;
             const d = Math.sqrt(dx * dx + dy * dy);
 
             const minRadius = obj.radius;
@@ -108,7 +110,7 @@ window.GravityCursor = (function() {
                     force.x += fx = Math.cos(angle) * radius;
                     force.y += fy = Math.sin(angle) * radius;
                     if (showDebugInfo) {
-                        DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#F00', lineWidth: 3 });
+                        if (debugLevel == 1) DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#F00', lineWidth: 3 });
                         DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#F00', lineWidth: 1, lineDash: [2, 2] });
                     }
                 } else  if (obj.direction == -1) {
@@ -117,13 +119,13 @@ window.GravityCursor = (function() {
                     force.x += fx = Math.cos(angle) * (radius - d);
                     force.y += fy = Math.sin(angle) * (radius - d);
                     if (showDebugInfo) {
-                        DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#0F0', lineWidth: 3 });
+                        if (debugLevel == 1) DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#0F0', lineWidth: 3 });
                         DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#0F0', lineWidth: 1, lineDash: [2, 2] });
                     }
                 }
             }
         })
-        if (showDebugInfo) DebugCanvas.draw.line(cursor.x, cursor.y, cursor.x + force.x, cursor.y + force.y, { strokeStyle: '#000', lineWidth: 3 });
+        if (showDebugInfo) DebugCanvas.draw.image(cursor.image, position.x, position.y, {opacity: 0.5});
         return force;
     }
 
@@ -177,10 +179,9 @@ window.GravityCursor = (function() {
             }
             onNextFrame(() => {
                 cursor.show();
-
                 let mouse = {
                     x: evt.clientX,
-                    y: evt.clientY,
+                    y: evt.clientY
                 }
 
                 let force = calculateForces(mouse, forces);
@@ -222,8 +223,10 @@ window.GravityCursor = (function() {
         return this;
     }
 
-    function debug(enable) {
+    function debug(enable, level) {
         showDebugInfo = enable;
+        debugLevel = level || 0;
+        if (DebugCanvas) DebugCanvas.clear();
     }
 
     function init() {
