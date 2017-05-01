@@ -14,17 +14,23 @@
         <meta property="og:description" content="How to hijack the user cursor and make it react to gravity elements on the page">
 
         <style type='text/css'>
+            .plant,
             .shroom-button,
             .ghost-button,
             .github-button {
                 display: inline-block;
+                position: absolute;
+                background-repeat: no-repeat;
+                background-size: contain;
+                image-rendering: pixelated;
+            }
+            .github-button {
                 top: calc(50vh - 50px);
                 left: calc(50vw - 50px);
                 width: 100px;
                 height: 100px;
-                position: absolute;
-                background: url(github.png) no-repeat;
-                background-size: contain;
+                background-image: url(github.png);
+                image-rendering: auto;
             }
             .github-button:hover {
                 opacity: 0.8;
@@ -43,6 +49,19 @@
             }
             .shroom-button {
                 background-image: url(shroom.png);
+            }
+            .plant {
+                top: calc(50vh - 84px);
+                left: calc(50vw - 64px);
+                width: 128px;
+                height: 168px;
+                padding-top: 100px;
+                background-image: url(plant.png);
+                background-size: 200%;
+                background-position: 0 100px;
+            }
+            .plant.active {
+                background-position: 100% 100px;
             }
         </style>
     </head>
@@ -95,11 +114,6 @@
                 return 'calc(' + a + ' ' + b + ')';
             }
 
-            var reset = function() {
-                GravityCursor.remove();
-                main.innerHTML = '';
-            }
-
             var createDemo = function(label, demoStartCallback) {
                 var buttons = header.querySelector('.buttons');
                 var button = createElement('div', {
@@ -107,7 +121,8 @@
                     innerHTML: label
                 });
                 button.addEventListener('click', function() {
-                    reset();
+                    GravityCursor.stop();
+                    main.innerHTML = '';
 
                     // Make all the siblings innactive
                     var sibling = this.parentNode.firstChild;
@@ -121,6 +136,7 @@
                     this.classList.add('active');
 
                     demoStartCallback();
+                    GravityCursor.start();
                 });
                 buttons.appendChild(button);
             };
@@ -186,6 +202,25 @@
                 }
             };
 
+            var startPlantDemo = function() {
+                var elem = createElement('div', {
+                    className: 'plant'
+                });
+                main.appendChild(elem);
+                GravityCursor.attract(elem, 200);
+                elem.addEventListener('attract', function(e) {
+                    if (e.detail.strength == 1) {
+                        var plant = this;
+                        plant.classList.add('active');
+                        GravityCursor.hide();
+                        setTimeout(function() {
+                            plant.classList.remove('active');
+                            GravityCursor.show();
+                        }, 2000);
+                    }
+                });
+            };
+
             var createDebugCheckbox = function() {
                 var debug = createElement('div');
                 var checkbox = createElement('input', {
@@ -210,6 +245,7 @@
                 createDemo('Circle', startCircleDemo);
                 createDemo('Attractors', createGridDemo(gridSize, gridSize, {title:':D', className: 'shroom-button', method: 'attract'}));
                 createDemo('Deflectors', createGridDemo(gridSize, gridSize, {title:'Boo!', className: 'ghost-button', method: 'repel', radius: 25}));
+                createDemo('Plant', startPlantDemo);
                 createDebugCheckbox();
 
                 header.querySelector('.buttons .button').click();

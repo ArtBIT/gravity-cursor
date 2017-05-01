@@ -33,8 +33,8 @@ window.GravityCursor = (function() {
             type += '_retina';
         }
         let config = CursorAssets[type] || CursorAssets.other;
-
         let node = document.createElement('img');
+
         node.style.width = config.width + 'px'
         node.style.height = config.height + 'px';
         node.style.position = 'fixed';
@@ -43,16 +43,23 @@ window.GravityCursor = (function() {
         node.style.zIndex = VIRTUAL_CURSOR_ZINDEX;
         node.src = config.src;
         body.appendChild(node);
+
         this.image = node;
 
         this.show = () => {
-            html.classList.add(VIRTUAL_CURSOR_CLASSNAME);
             node.style.display = "inline-block";
         }
 
         this.hide = () => {
-            html.classList.remove(VIRTUAL_CURSOR_CLASSNAME);
             node.style.display = "none";
+        }
+
+        this.activate = () => {
+            html.classList.add(VIRTUAL_CURSOR_CLASSNAME);
+        }
+
+        this.deactivate = () => {
+            html.classList.remove(VIRTUAL_CURSOR_CLASSNAME);
         }
 
         this.moveTo = (x, y) => {
@@ -78,6 +85,11 @@ window.GravityCursor = (function() {
         return value;
     }
 
+    function dispatchEvent(element, eventType, detail) {
+        var event = new CustomEvent(eventType, {detail: detail});
+        element.dispatchEvent(event);
+    }
+
     function calculateForces(position, forces) {
         let force = {
             x: 0,
@@ -98,14 +110,15 @@ window.GravityCursor = (function() {
 
             const minRadius = obj.radius;
             const maxRadius = obj.radius << 1;
-            let fx, fy;
+            let fx, fy, strength;
 
             if (d <= maxRadius) {
                 var radius = constrain(d, minRadius) - minRadius;
                 var angle = Math.atan2(dy, dx);
                 if (obj.direction == 1) {
                     // REPEL
-                    radius *= Math.pow(radius / minRadius, 2)
+                    strength = Math.pow(radius / minRadius, 2)
+                    radius *= strength;
                     radius += minRadius - d;
                     force.x += fx = Math.cos(angle) * radius;
                     force.y += fy = Math.sin(angle) * radius;
@@ -113,15 +126,18 @@ window.GravityCursor = (function() {
                         if (debugLevel == 1) DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#F00', lineWidth: 3 });
                         DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#F00', lineWidth: 1, lineDash: [2, 2] });
                     }
+                    dispatchEvent(obj.node, 'repel', {strength: strength, distance: d});
                 } else  if (obj.direction == -1) {
                     // ATTRACT
-                    radius = Math.pow(radius / minRadius, 2) * d;
+                    strength = Math.pow(radius / minRadius, 2);
+                    radius = strength * d;
                     force.x += fx = Math.cos(angle) * (radius - d);
                     force.y += fy = Math.sin(angle) * (radius - d);
                     if (showDebugInfo) {
                         if (debugLevel == 1) DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#0F0', lineWidth: 3 });
                         DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#0F0', lineWidth: 1, lineDash: [2, 2] });
                     }
+                    dispatchEvent(obj.node, 'attract', {strength: 1-strength, distance: d});
                 }
             }
         })
@@ -154,13 +170,13 @@ window.GravityCursor = (function() {
         function onMouseOut(e) {
             // If relatedTarget is null, that means the mouse has left the page
             if (!e.relatedTarget) {
-                cursor.hide();
+                cursor.deactivate();
             }
         }
 
         function onBlur() {
             onNextFrame(() => {
-                cursor.hide();
+                cursor.deactivate();
             });
         }
 
@@ -169,7 +185,7 @@ window.GravityCursor = (function() {
                 return;
             }
             onNextFrame(() => {
-                cursor.show();
+                cursor.activate();
             });
         }
 
@@ -178,7 +194,7 @@ window.GravityCursor = (function() {
                 return;
             }
             onNextFrame(() => {
-                cursor.show();
+                cursor.activate();
                 let mouse = {
                     x: evt.clientX,
                     y: evt.clientY
@@ -213,12 +229,21 @@ window.GravityCursor = (function() {
         return this;
     }
 
-    function remove(element) {
+    function start() {
+        cursor.activate();
+        cursor.show();
+        return this;
+    }
+
+    function stop(element) {
         if (element) {
             forces = forces.filter(item => item.node !== element);
         } else {
             forces = [];
+        }
+        if (!forces.length) {
             cursor.hide();
+            cursor.deactivate();
         }
         return this;
     }
@@ -227,6 +252,20 @@ window.GravityCursor = (function() {
         showDebugInfo = enable;
         debugLevel = level || 0;
         if (DebugCanvas) DebugCanvas.clear();
+        return this;
+    }
+
+    function show() {
+        if (forces.length) {
+            cursor.show();
+            cursor.activate();
+        }
+        return this;
+    }
+
+    function hide() {
+        cursor.hide();
+        return this;
     }
 
     function init() {
@@ -240,7 +279,10 @@ window.GravityCursor = (function() {
         controller.debug = debug;
         controller.repel = repel.bind(controller);
         controller.attract = attract.bind(controller);
-        controller.remove = remove.bind(controller);
+        controller.stop = stop.bind(controller);
+        controller.start = start.bind(controller);
+        controller.show = show.bind(controller);
+        controller.hide = hide.bind(controller);
         return controller;
     }
 

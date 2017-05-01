@@ -14,10 +14,11 @@ It makes the user cursor invisible using a simple `cursor: none;` CSS rule, and 
 ```js
 GravityCursor
     .attract(document.querySelector('a.attractor'))
-    .repel(document.querySelector('a.deflector'));
+    .repel(document.querySelector('a.deflector'))
+    .start();
 
 document.querySelector('a.stop').addEventListener('click', function() {
-    GravityCursor.remove();
+    GravityCursor.stop();
 });
 ```
 
