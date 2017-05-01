@@ -58,6 +58,7 @@
         </header> 
         <main></main>
         <script src="../dist/index.js"></script>
+        <script src="debugcanvas.js"></script>
         <script type="text/javascript">
             var main = document.getElementsByTagName('main')[0];
             var header = document.getElementsByTagName('header')[0];
@@ -133,7 +134,7 @@
                     className: 'github-button'
                 });
                 main.appendChild(elem);
-                GravityCursor.attract(elem, 100);
+                GravityCursor.attract(elem, 50);
 
                 // Circle it around with N repelling ghosts
                 var count = 8;
@@ -179,7 +180,7 @@
                                 }
                             });
                             main.appendChild(elem);
-                            GravityCursor[options.method || 'attract'](elem, 32);
+                            GravityCursor[options.method || 'attract'](elem, 16);
                         }
                     }
                 }
@@ -204,17 +205,37 @@
                             }
                         });
                         main.appendChild(elem);
-                        GravityCursor[attract ? 'attract' : 'repel'](elem, 32);
+                        GravityCursor[attract ? 'attract' : 'repel'](elem, 16);
                     }
                 }
             };
 
+            var createDebugCheckbox = function() {
+                var debug = createElement('div');
+                var checkbox = createElement('input', {
+                    type: 'checkbox',
+                    value: '1',
+                    id: 'debugCheckbox'
+                });
+                checkbox.addEventListener('change', function() {
+                    GravityCursor.debug(this.checked);
+                });
+                debug.appendChild(checkbox);
+                var label = createElement('label', {
+                    for: 'debugCheckbox',
+                    innerHTML: 'debug'
+                });
+                debug.appendChild(label);
+                header.appendChild(debug);
+            };
 
             var init = function() {
                 var gridSize = 5;
                 createDemo('Circle', startCircleDemo);
                 createDemo('Attractors', createGridDemo(gridSize, gridSize, {title:':D', className: 'shroom-button', method: 'attract'}));
                 createDemo('Deflectors', createGridDemo(gridSize, gridSize, {title:'Boo!', className: 'ghost-button', method: 'repel'}));
+                createDebugCheckbox();
+
                 header.querySelector('.buttons .button').click();
             }
             init();

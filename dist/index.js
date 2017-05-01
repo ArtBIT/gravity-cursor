@@ -1,6 +1,7 @@
 window.GravityCursor = function () {
     const VIRTUAL_CURSOR_CLASSNAME = 'virtual-cursor';
     const VIRTUAL_CURSOR_ZINDEX = 10000;
+    let showDebugInfo = false;
 
     let cursor;
     let forces = [];
@@ -61,40 +62,68 @@ window.GravityCursor = function () {
         };
     }
 
+    function constrain(value, min, max) {
+        if (min !== undefined) {
+            if (value < min) {
+                return min;
+            }
+        }
+        if (max !== undefined) {
+            if (value > max) {
+                return max;
+            }
+        }
+        return value;
+    }
+
     function calculateForces(cursor, forces) {
         let force = {
             x: 0,
             y: 0
         };
-        var wsz = Math.min(window.innerHeight, window.innerWidth) / 2;
+        if (showDebugInfo) DebugCanvas.clear();
+
         forces.forEach(obj => {
             // Calculating object rectangle is more expensive, but simpler since we do not have to keep track 
             // of object's position and window resizing.
 
-            var rect = obj.node.getBoundingClientRect();
-            var dx = cursor.x - (rect.left + rect.width / 2);
-            var dy = cursor.y - (rect.top + rect.height / 2);
-            var d = Math.sqrt(dx * dx + dy * dy);
+            const rect = obj.node.getBoundingClientRect();
+            const rx = rect.left + rect.width / 2;
+            const ry = rect.top + rect.height / 2;
+            const dx = cursor.x - rx;
+            const dy = cursor.y - ry;
+            const d = Math.sqrt(dx * dx + dy * dy);
 
-            var weight = Math.pow(1 - Math.min(1, Math.max(d / wsz, 0)), 2);
-            if (weight > 0.001) {
+            const minRadius = obj.radius;
+            const maxRadius = obj.radius << 1;
+            let fx, fy;
+
+            if (d <= maxRadius) {
+                var radius = constrain(d, minRadius) - minRadius;
+                var angle = Math.atan2(dy, dx);
                 if (obj.direction == 1) {
                     // REPEL
-                    var angle = Math.atan2(dy, dx);
-                    d = obj.radius * obj.direction * weight / Math.SQRT2;
-                    force.x += Math.cos(angle) * d;
-                    force.y += Math.sin(angle) * d;
+                    radius *= Math.pow(radius / minRadius, 2);
+                    radius += minRadius - d;
+                    force.x += fx = Math.cos(angle) * radius;
+                    force.y += fy = Math.sin(angle) * radius;
+                    if (showDebugInfo) {
+                        DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#F00', lineWidth: 3 });
+                        DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#F00', lineWidth: 1, lineDash: [2, 2] });
+                    }
                 } else if (obj.direction == -1) {
                     // ATTRACT
-                    if (d <= obj.radius) {
-                        weight = Math.pow(1 - d / obj.radius, 0.5);
-                        d = weight * obj.direction;
-                        force.x += dx * d;
-                        force.y += dy * d;
+                    radius = Math.pow(radius / minRadius, 2) * d;
+                    force.x += fx = Math.cos(angle) * (radius - d);
+                    force.y += fy = Math.sin(angle) * (radius - d);
+                    if (showDebugInfo) {
+                        DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#0F0', lineWidth: 3 });
+                        DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#F00', lineWidth: 1, lineDash: [2, 2] });
                     }
                 }
             }
         });
+        if (showDebugInfo) DebugCanvas.draw.line(cursor.x, cursor.y, cursor.x + force.x, cursor.y + force.y, { strokeStyle: '#0F0', lineWidth: 3 });
         return force;
     }
 
@@ -193,6 +222,10 @@ window.GravityCursor = function () {
         return this;
     }
 
+    function debug(enable) {
+        showDebugInfo = enable;
+    }
+
     function init() {
         forces = [];
         cursor = new VirtualCursor();
@@ -201,6 +234,7 @@ window.GravityCursor = function () {
         bindEvents();
 
         const controller = {};
+        controller.debug = debug;
         controller.repel = repel.bind(controller);
         controller.attract = attract.bind(controller);
         controller.remove = remove.bind(controller);
