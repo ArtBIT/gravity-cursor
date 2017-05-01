@@ -180,32 +180,8 @@
                                 }
                             });
                             main.appendChild(elem);
-                            GravityCursor[options.method || 'attract'](elem, 16);
+                            GravityCursor[options.method || 'attract'](elem, options.radius || 16);
                         }
-                    }
-                }
-            };
-
-            var startAttractorsDemo = function() {
-                var cols = 8;
-                var rows = 8;
-                var cx = cols >> 1;
-                var cy = rows >> 1;
-                var distance = 50;
-                for (var x = 0; x < cols; x++) {
-                    for (var y = 0; y < rows; y++) {
-                        var elem = createElement('a', {
-                            href: '#javascript:void(0)',
-                            title: attract ? 'XD' : 'Boo!',
-                            target: '_blank',
-                            className: attract ? 'shroom-button' : 'ghost-button',
-                            style: {
-                                top: calc('50vh - 16px', (y - cy)*distance),
-                                left: calc('50vw - 16px', (x - cx)*distance)
-                            }
-                        });
-                        main.appendChild(elem);
-                        GravityCursor[attract ? 'attract' : 'repel'](elem, 16);
                     }
                 }
             };
@@ -233,7 +209,7 @@
                 var gridSize = 5;
                 createDemo('Circle', startCircleDemo);
                 createDemo('Attractors', createGridDemo(gridSize, gridSize, {title:':D', className: 'shroom-button', method: 'attract'}));
-                createDemo('Deflectors', createGridDemo(gridSize, gridSize, {title:'Boo!', className: 'ghost-button', method: 'repel'}));
+                createDemo('Deflectors', createGridDemo(gridSize, gridSize, {title:'Boo!', className: 'ghost-button', method: 'repel', radius: 25}));
                 createDebugCheckbox();
 
                 header.querySelector('.buttons .button').click();
