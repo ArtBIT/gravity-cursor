@@ -53,8 +53,6 @@ window.GravityCursor = (function() {
         }
 
         this.moveTo = (x, y) => {
-            //x = Math.max(0, x - config.width) | 0;
-            //y = Math.max(0, y - config.height) | 0;
             node.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         }
 
@@ -77,7 +75,6 @@ window.GravityCursor = (function() {
             var dx = cursor.x - (rect.left + rect.width / 2);
             var dy = cursor.y - (rect.top + rect.height / 2);
             var d = Math.sqrt(dx * dx + dy * dy);
-
 
             var weight = Math.pow(1 - Math.min(1, Math.max(d / wsz, 0)), 2);
             if (weight > 0.001) {
@@ -158,7 +155,6 @@ window.GravityCursor = (function() {
                 }
 
                 let force = calculateForces(mouse, forces);
-                console.log(mouse, force);
                 cursor.moveTo(mouse.x + force.x, mouse.y + force.y);
             });
         }

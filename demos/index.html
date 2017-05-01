@@ -211,9 +211,10 @@
 
 
             var init = function() {
+                var gridSize = 5;
                 createDemo('Circle', startCircleDemo);
-                createDemo('Attractors', createGridDemo(8, 8, {title:':D', className: 'shroom-button', method: 'attract'}));
-                createDemo('Deflectors', createGridDemo(8, 8, {title:'Boo!', className: 'ghost-button', method: 'repel'}));
+                createDemo('Attractors', createGridDemo(gridSize, gridSize, {title:':D', className: 'shroom-button', method: 'attract'}));
+                createDemo('Deflectors', createGridDemo(gridSize, gridSize, {title:'Boo!', className: 'ghost-button', method: 'repel'}));
                 header.querySelector('.buttons .button').click();
             }
             init();

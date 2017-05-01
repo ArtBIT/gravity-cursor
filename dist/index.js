@@ -53,8 +53,6 @@ window.GravityCursor = function () {
         };
 
         this.moveTo = (x, y) => {
-            //x = Math.max(0, x - config.width) | 0;
-            //y = Math.max(0, y - config.height) | 0;
             node.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         };
 
@@ -157,7 +155,6 @@ window.GravityCursor = function () {
                 };
 
                 let force = calculateForces(mouse, forces);
-                console.log(mouse, force);
                 cursor.moveTo(mouse.x + force.x, mouse.y + force.y);
             });
         }
