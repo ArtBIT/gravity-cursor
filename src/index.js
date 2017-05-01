@@ -118,12 +118,12 @@ window.GravityCursor = (function() {
                     force.y += fy = Math.sin(angle) * (radius - d);
                     if (showDebugInfo) {
                         DebugCanvas.draw.line(rx, ry, rx + fx, ry + fy, { strokeStyle: '#0F0', lineWidth: 3 });
-                        DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#F00', lineWidth: 1, lineDash: [2, 2] });
+                        DebugCanvas.draw.circle(rx, ry, minRadius, { strokeStyle: '#0F0', lineWidth: 1, lineDash: [2, 2] });
                     }
                 }
             }
         })
-        if (showDebugInfo) DebugCanvas.draw.line(cursor.x, cursor.y, cursor.x + force.x, cursor.y + force.y, { strokeStyle: '#0F0', lineWidth: 3 });
+        if (showDebugInfo) DebugCanvas.draw.line(cursor.x, cursor.y, cursor.x + force.x, cursor.y + force.y, { strokeStyle: '#000', lineWidth: 3 });
         return force;
     }
 
