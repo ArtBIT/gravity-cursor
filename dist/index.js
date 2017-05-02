@@ -27,6 +27,12 @@ window.GravityCursor = function () {
         }
     };
 
+    function onNextFrame(callback) {
+        window.requestAnimationFrame(() => {
+            return callback();
+        });
+    }
+
     function VirtualCursor() {
         let type = window.navigator.platform.indexOf('Mac') > -1 ? 'mac' : 'win';
         if (window.devicePixelRatio > 1) {
@@ -37,21 +43,20 @@ window.GravityCursor = function () {
 
         node.style.width = config.width + 'px';
         node.style.height = config.height + 'px';
-        node.style.position = 'fixed';
-        node.style.display = 'none';
-        node.style.pointerEvents = 'none';
-        node.style.zIndex = VIRTUAL_CURSOR_ZINDEX;
+        node.className = VIRTUAL_CURSOR_CLASSNAME;
         node.src = config.src;
         body.appendChild(node);
 
         this.image = node;
+        var visible = false;
 
         this.show = () => {
-            node.style.display = "inline-block";
+            visible = true;
         };
 
         this.hide = () => {
-            node.style.display = "none";
+            visible = false;
+            node.style.visibility = "hidden";
         };
 
         this.activate = () => {
@@ -59,10 +64,15 @@ window.GravityCursor = function () {
         };
 
         this.deactivate = () => {
-            html.classList.remove(VIRTUAL_CURSOR_CLASSNAME);
+            onNextFrame(() => {
+                html.classList.remove(VIRTUAL_CURSOR_CLASSNAME);
+            });
         };
 
         this.moveTo = (x, y) => {
+            if (visible && node.style.visibility == "hidden") {
+                node.style.visibility = "visible";
+            }
             node.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
         };
 
@@ -156,16 +166,20 @@ window.GravityCursor = function () {
             user-select: none;
             -webkit-user-select: none;
         }
+        img.${VIRTUAL_CURSOR_CLASSNAME} {
+            position: fixed;
+            display: none;
+            pointer-events: none;
+            z-index: ${VIRTUAL_CURSOR_ZINDEX};
+        }
+        .${VIRTUAL_CURSOR_CLASSNAME} img.${VIRTUAL_CURSOR_CLASSNAME} {
+            display: inline-block;
+        }
         `;
         body.appendChild(style);
     }
 
     function bindEvents() {
-        function onNextFrame(callback) {
-            window.requestAnimationFrame(() => {
-                return callback();
-            });
-        }
 
         function onMouseOut(e) {
             // If relatedTarget is null, that means the mouse has left the page
@@ -193,16 +207,14 @@ window.GravityCursor = function () {
             if (!forces.length) {
                 return;
             }
-            onNextFrame(() => {
-                cursor.activate();
-                let mouse = {
-                    x: evt.clientX,
-                    y: evt.clientY
-                };
+            cursor.activate();
+            let mouse = {
+                x: evt.clientX,
+                y: evt.clientY
+            };
 
-                let force = calculateForces(mouse, forces);
-                cursor.moveTo(mouse.x + force.x, mouse.y + force.y);
-            });
+            let force = calculateForces(mouse, forces);
+            cursor.moveTo(mouse.x + force.x, mouse.y + force.y);
         }
 
         document.addEventListener('mouseout', onMouseOut);
@@ -230,8 +242,7 @@ window.GravityCursor = function () {
     }
 
     function start() {
-        cursor.activate();
-        cursor.show();
+        show();
         return this;
     }
 

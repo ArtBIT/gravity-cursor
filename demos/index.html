@@ -208,14 +208,19 @@
                 });
                 main.appendChild(elem);
                 GravityCursor.attract(elem, 200);
+                var active = false;
                 elem.addEventListener('attract', function(e) {
-                    if (e.detail.strength == 1) {
+                    if (!active && e.detail.strength > 0.95) {
+                        active = true;
                         var plant = this;
                         plant.classList.add('active');
                         GravityCursor.hide();
                         setTimeout(function() {
                             plant.classList.remove('active');
                             GravityCursor.show();
+                            setTimeout(function() {
+                                active = false;
+                            }, 1000);
                         }, 2000);
                     }
                 });
