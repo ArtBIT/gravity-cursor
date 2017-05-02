@@ -88,6 +88,13 @@
                 for (var a in attrs) {
                     if (attrs.hasOwnProperty(a)) {
                         switch (a) {
+                            case 'data':
+                                for (var d in attrs[a]) {
+                                    if (attrs[a].hasOwnProperty(d)) {
+                                        elem.setAttribute('data-'+d, attrs[a][d]);
+                                    }
+                                }
+                                break;
                             case 'style':
                                 for (var s in attrs[a]) {
                                     if (attrs[a].hasOwnProperty(s)) {
@@ -116,9 +123,13 @@
 
             var createDemo = function(label, demoStartCallback) {
                 var buttons = header.querySelector('.buttons');
+                var demoName = label.toLowerCase();
                 var button = createElement('div', {
                     className: 'button',
-                    innerHTML: label
+                    innerHTML: label,
+                    data: {
+                        name: demoName
+                    }
                 });
                 button.addEventListener('click', function() {
                     GravityCursor.stop();
@@ -137,6 +148,8 @@
 
                     demoStartCallback();
                     GravityCursor.start();
+
+                    history.pushState(demoName, 'Gravity Cursor Demo: ' + label, '?'+demoName);
                 });
                 buttons.appendChild(button);
             };
@@ -244,6 +257,16 @@
                 debug.appendChild(label);
                 header.appendChild(debug);
             };
+            var onPopState = function(e) {
+                var demo = e.state;
+                var button = header.querySelector('.buttons .button[data-name='+demo+']');
+                if (!button) {
+                    button = header.querySelector('.buttons .button');
+                }
+                if (button) {
+                    button.click();
+                }
+            };
 
             var init = function() {
                 var gridSize = 5;
@@ -252,8 +275,8 @@
                 createDemo('Deflectors', createGridDemo(gridSize, gridSize, {title:'Boo!', className: 'ghost-button', method: 'repel', radius: 25}));
                 createDemo('Plant', startPlantDemo);
                 createDebugCheckbox();
-
-                header.querySelector('.buttons .button').click();
+                window.addEventListener('popstate', onPopState);
+                onPopState({state: window.location.search.split('?').pop() || 'circle'});
             }
             init();
         </script>
