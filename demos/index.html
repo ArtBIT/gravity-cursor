@@ -6,6 +6,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
         <link rel="stylesheet" href="style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+        <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 
         <title>Cursor Gravity Demo</title>
         <meta property="og:title" content="Control User Cursor">
@@ -71,7 +72,7 @@
                 Cursor Gravity Demo
             </div>
             <div class="description">
-                Hijack user's cursor and do fun stuff with it.
+                Hijack the mouse cursor and make react to attractor and deflector elements on the page. See the <a href="https://github.com/ArtBIT/gravity-cursor">GitHub page</a> for more info.
             </div>
             <div class="buttons"></div>
         </header> 
@@ -257,6 +258,7 @@
                 debug.appendChild(label);
                 header.appendChild(debug);
             };
+
             var onPopState = function(e) {
                 var demo = e.state;
                 var button = header.querySelector('.buttons .button[data-name='+demo+']');
@@ -268,7 +270,7 @@
                 }
             };
 
-            var init = function() {
+            var showDemos = function() {
                 var gridSize = 5;
                 createDemo('Circle', startCircleDemo);
                 createDemo('Attractors', createGridDemo(gridSize, gridSize, {title:':D', className: 'shroom-button', method: 'attract'}));
@@ -277,6 +279,70 @@
                 createDebugCheckbox();
                 window.addEventListener('popstate', onPopState);
                 onPopState({state: window.location.search.split('?').pop() || 'circle'});
+            };
+
+            var showSorryMario = function() {
+                header.style.display = 'none';
+                document.body.style.background = '#111';
+                var style = {
+                    position: 'fixed',
+                    height: '64px',
+                    width: '100%',
+                    backgroundImage: 'url(castle-brick.png)',
+                    backgroundSize: 'auto 100%',
+                    backgroundRepeat: 'repeat',
+                    imageRendering: 'pixelated'
+                };
+                // top row
+                document.body.appendChild(createElement('div', {
+                    style: style
+                }));
+                // bottom row
+                style.bottom = '0';
+                style.backgroundSize = 'auto 75%';
+                style.height = '96px';
+                document.body.appendChild(createElement('div', {
+                    style: style
+                }));
+                // text
+                document.body.appendChild(createElement('div', {
+                    innerHTML: '<p>I am sorry Mario</p><p>But your mouse cursor is in another castle.</p><p>This library does not work with touch devices.</p>',
+                    style: {
+                        position: 'fixed',
+                        top: 'calc(50vh - 128px)',
+                        left: 'calc(50vw - 40%)',
+                        width: '80%',
+                        height: 'calc(100vh - 256px)',
+                        color: 'white',
+                        textAlign: 'center',
+                        fontSize: '1.4em',
+                        fontFamily: '"Press Start 2P", cursive'
+                    }
+                }));
+                // toad
+                document.body.appendChild(createElement('a', {
+                    href: 'https://github.com/ArtBIT/gravity-cursor',
+                    style: {
+                        position: 'fixed',
+                        bottom: '96px',
+                        left: 'calc(50vw - 32px)',
+                        width: '64px',
+                        height: '96px',
+                        backgroundImage: 'url(toad.png)',
+                        backgroundSize: '100%',
+                        backgroundRepeat: 'no-repeat',
+                        imageRendering: 'pixelated'
+                    }
+                }));
+
+            };
+
+            var init = function() {
+                if (('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch) { 
+                    showSorryMario();
+                } else {
+                    showDemos();
+                }
             }
             init();
         </script>
