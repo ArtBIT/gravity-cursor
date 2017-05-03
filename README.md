@@ -1,5 +1,4 @@
 # Cursor Gravity
-Inspired by [javierbyte/control-user-cursor](https://github.com/javierbyte/control-user-cursor)
 
 This is a small experiment that hijacks the user cursor and makes it attract to or repel from certain elements on the page.
 
@@ -35,3 +34,8 @@ npm start
 ## License
 
 MIT
+
+
+## Credits
+
+Inspired by [javierbyte/control-user-cursor](https://github.com/javierbyte/control-user-cursor)
