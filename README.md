@@ -4,7 +4,7 @@ This is a small experiment that hijacks the user cursor and makes it attract to 
 
 Try the live demo [here](https://artbit.github.io/gravity-cursor/demos/).
 
-[![gravity-cursor](demos/demo.gif?1)](http://github.com/artbit/gravity-cursor/)
+[![gravity-cursor](demos/assets/demo.gif)](http://github.com/artbit/gravity-cursor/)
 
 ## How it works?
 It makes the user cursor invisible using a simple `cursor: none;` CSS rule, and replaces it with a simple image element, which is moved around the screen to imitate original cursor, but making it react to attractors and deflectors on the page.
