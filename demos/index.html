@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-        <link rel="stylesheet" href="style.css" type="text/css" media="screen" title="no title" charset="utf-8">
+        <link rel="stylesheet" href="assets/style.css" type="text/css" media="screen" title="no title" charset="utf-8">
         <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
 
         <title>Cursor Gravity Demo</title>
@@ -30,17 +30,18 @@
                 left: calc(50vw - 50px);
                 width: 100px;
                 height: 100px;
-                background-image: url(github.png);
+                background-image: url(assets/mark-github-white-128.png);
                 image-rendering: auto;
+                opacity: 0.5;
             }
             .github-button:hover {
-                opacity: 0.8;
+                opacity: 1;
             }
             .shroom-button,
             .ghost-button {
                 width: 32px;
                 height: 32px;
-                background-image: url(ghost.png);
+                background-image: url(assets/ghost.png);
                 background-size: 200%;
                 background-position: 0 0;
             }
@@ -49,36 +50,36 @@
                 background-position: 100% 0;
             }
             .shroom-button {
-                background-image: url(shroom.png);
+                background-image: url(assets/shroom.png);
             }
             .plant {
                 top: calc(50vh - 84px);
                 left: calc(50vw - 64px);
                 width: 128px;
-                height: 168px;
-                padding-top: 100px;
-                background-image: url(plant.png);
+                height: 238px;
+                background-image: url(assets/plant.png);
                 background-size: 200%;
-                background-position: 0 100px;
+                background-position: 0 70px;
             }
             .plant.active {
-                background-position: 100% 100px;
+                background-position: 100% 70px;
             }
         </style>
     </head>
     <body>
         <header>
-            <div class="title">
+            <h1 class="title">
+                <a class="github-link" href="https://github.com/artbit/gravity-cursor"></a>
                 Cursor Gravity Demo
-            </div>
-            <div class="description">
-                Hijack the mouse cursor and make react to attractor and deflector elements on the page. See the <a href="https://github.com/ArtBIT/gravity-cursor">GitHub page</a> for more info.
-            </div>
-            <div class="buttons"></div>
+            </h1>
+            <p class="info">
+            Hijack the mouse cursor and make react to attractor and deflector elements on the page.
+            </p>
+            <nav class="demos"></nav>
         </header> 
         <main></main>
         <script src="../dist/index.js"></script>
-        <script src="debugcanvas.js"></script>
+        <script src="assets/debugcanvas.js"></script>
         <script type="text/javascript">
             var main = document.getElementsByTagName('main')[0];
             var header = document.getElementsByTagName('header')[0];
@@ -123,16 +124,17 @@
             }
 
             var createDemo = function(label, demoStartCallback) {
-                var buttons = header.querySelector('.buttons');
+                var demos = header.querySelector('.demos');
                 var demoName = label.toLowerCase();
-                var button = createElement('div', {
-                    className: 'button',
+                var demo = createElement('a', {
+                    className: 'demo',
+                    href: 'javascript:void(0)',
                     innerHTML: label,
                     data: {
                         name: demoName
                     }
                 });
-                button.addEventListener('click', function() {
+                demo.addEventListener('click', function() {
                     GravityCursor.stop();
                     main.innerHTML = '';
 
@@ -144,7 +146,7 @@
                         }
                         sibling = sibling.nextSibling;
                     } 
-                    // make the current button active
+                    // make the current demo active
                     this.classList.add('active');
 
                     demoStartCallback();
@@ -152,7 +154,7 @@
 
                     history.pushState(demoName, 'Gravity Cursor Demo: ' + label, '?'+demoName);
                 });
-                buttons.appendChild(button);
+                demos.appendChild(demo);
             };
 
             var startCircleDemo = function() {
@@ -260,13 +262,13 @@
             };
 
             var onPopState = function(e) {
-                var demo = e.state;
-                var button = header.querySelector('.buttons .button[data-name='+demo+']');
-                if (!button) {
-                    button = header.querySelector('.buttons .button');
+                var name = e.state;
+                var demo = header.querySelector('.demos .demo[data-name='+name+']');
+                if (!demo) {
+                    demo = header.querySelector('.demos .demo');
                 }
-                if (button) {
-                    button.click();
+                if (demo) {
+                    demo.click();
                 }
             };
 
@@ -288,7 +290,7 @@
                     position: 'fixed',
                     height: '64px',
                     width: '100%',
-                    backgroundImage: 'url(castle-brick.png)',
+                    backgroundImage: 'url(assets/castle-brick.png)',
                     backgroundSize: 'auto 100%',
                     backgroundRepeat: 'repeat',
                     imageRendering: 'pixelated'
@@ -329,7 +331,7 @@
                         left: 'calc(50vw - 32px)',
                         width: '64px',
                         height: '96px',
-                        backgroundImage: 'url(toad.png)',
+                        backgroundImage: 'url(assets/toad.png)',
                         backgroundSize: '100%',
                         backgroundRepeat: 'no-repeat',
                         imageRendering: 'pixelated'
