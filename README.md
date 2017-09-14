@@ -1,3 +1,5 @@
+[![GitHub stars](https://img.shields.io/github/stars/ArtBIT/gravity-cursor.svg)](https://github.com/ArtBIT/gravity-cursor) [![GitHub license](https://img.shields.io/github/license/ArtBIT/gravity-cursor.svg)](https://github.com/ArtBIT/gravity-cursor) [![GitHub issues](https://img.shields.io/github/issues/ArtBIT/gravity-cursor.svg)](https://github.com/ArtBIT/gravity-cursor/issues)
+
 # Cursor Gravity
 
 This is a small experiment that hijacks the user cursor and makes it attract to or repel from certain elements on the page.
